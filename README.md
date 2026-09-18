@@ -2,7 +2,7 @@
 
 ---
 
-# MiniMax H3 on an 8 GB Laptop — Five Measured Traps
+# MiniMax H3 on an 8 GB Laptop — six Measured Traps
 
 > Hardware: **RTX 5060 Laptop 8 GB (sm_120) + 15.26 GiB RAM**, Windows 11 25H2,
 > ComfyUI 0.35.0 (a7b1d39), PyTorch 2.14.0+cu130, Python 3.13.12
