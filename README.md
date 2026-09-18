@@ -8,7 +8,7 @@
 > ComfyUI 0.35.0 (a7b1d39), PyTorch 2.14.0+cu130, Python 3.13.12
 > Everything here is measured on that machine. Numbers that are *not* measured are labelled.
 
-This is not a "best settings" post. It's five things that cost me hours, each with a
+This is not a "best settings" post. It's six things that cost me hours, each with a
 reproduction you can run, and each one something I got wrong before I got it right.
 
 ---
