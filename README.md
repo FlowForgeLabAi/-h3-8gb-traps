@@ -2,7 +2,7 @@
 
 ---
 
-# MiniMax H3 on an 8 GB Laptop — six Measured Traps
+# MiniMax H3 on an 8 GB Laptop — Six Measured Traps
 
 > Hardware: **RTX 5060 Laptop 8 GB (sm_120) + 15.26 GiB RAM**, Windows 11 25H2,
 > ComfyUI 0.35.0 (a7b1d39), PyTorch 2.14.0+cu130, Python 3.13.12
@@ -271,6 +271,15 @@ evidence/
   results.csv       # 14 runs × 33 fields (peak VRAM/RAM, phase timings, crash flags)
   old_vs_new.png    # the prompt fix, same seed, same timestamps
   dense_grid.png    # subject dropout at 7.0 s
+  steps_8_vs_20.png # 8 steps vs 20 steps
+  encoder_isolation.png  # same frames re-encoded at two bitrates
+videos/
+  01-...mp4         # before the prompt fix: subject drops at ~7 s
+  02-...mp4         # after the prompt fix, 20 steps
+  03-...mp4         # after the prompt fix, 8 steps, VHS crf=12 (with audio)
+docs/
+  publish-notes.md      # repo description / topics / release notes / share text
+  working-report-cn.md  # raw working notes (contains retracted conclusions)
 ```
 
 ## Honest status
@@ -280,9 +289,12 @@ confirmed with byte-level or same-seed single-variable comparisons.
 
 **Not verified / open:**
 
-- **Any RTX 4060 number.** This machine has no 4060; the 4060 figures quoted are from
-  community benchmarks, and the sm_89-vs-sm_120 backend difference means 4060 users must
-  re-test the attention backend rather than assume kitchen wins there.
+- **RTX 4060 Laptop (sm_89) is now measured** (2026-09): at 4 steps / 5 s / 768x1024,
+  pytorch attention 403.8 s, comfy-kitchen 270.1 s, sage 263.0 s.
+  **kitchen beats pytorch by 1.5x on the 4060 too**, so the recommendation does not
+  need to be split by architecture. Still unmeasured there: 8-step and 20-step timings.
+  That machine's commit limit was only 22.14 GB (29% below this one), so A1's absolute
+  value may be partly polluted by pagefile growth.
 - **No claim that the included workflows are optimal.** They are a reasonable,
   evidence-aligned starting point.
 - The 8-vs-20 comparison in §6 is confounded by the encoder difference and rests on a
