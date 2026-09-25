@@ -91,9 +91,9 @@
 
 ---
 
-## 三、`SaveVideo` 的 H.264 重编码在这套环境里是死的 —— 用 `VHS_VideoCombine`
+## 三、`SaveVideo` 的 H.264 重编码在奇数列/行尺寸下会失败 —— 用 `VHS_VideoCombine`
 
-`SaveVideo` 有 `crf` 控件，但通过 API 够到它并不直观，而且**够到了也没用**：
+`SaveVideo` 有 `crf` 控件，但通过 API 够到它并不直观，而且**够到了也可能失败 —— 只要视频的宽或高是奇数**：
 
 ```
 av.error.ExternalError: [Errno 542398533] Generic error in an external library:
@@ -101,8 +101,16 @@ av.error.ExternalError: [Errno 542398533] Generic error in an external library:
     'avcodec_open2("libx264", {'crf': '12.0'})'
 ```
 
-**PyAV 自带的 libx264 打不开。** 唯一能用的模式是 `format=auto`，而它的语义是
-*"preserves a compatible source stream"* —— **根本不重编码，所以改不了画质。**
+**原因是尺寸，不是编码器坏了。** `video_types.py` 把帧的宽高原样交给 libx264，同时设
+`pix_fmt = "yuv420p"` —— 而 `yuv420p` 的色度是 2×2 下采样，**宽高必须都是偶数**。libx264
+拒绝打开并返回 `EINVAL (22)`；又因为 PyAV 是在 `encode()` 里惰性打开的，最终只报一个
+完全没提尺寸的外部库错误。
+
+同一套 PyAV（18.1.0）、**不启动 ComfyUI** 实测：`64x64`、`1080x1920` 正常；`65x63`、
+`63x65`、`65x65`、`1171x2532`、`1080x1441` 全部失败。我们的参考图是 **1259 × 1672**，
+宽为奇数。已上报为 [ComfyUI #16544](https://github.com/Comfy-Org/ComfyUI/issues/16544)。
+
+`format=auto` 不是替代方案：它的语义是「保留上游流、不重编码」，**改不了画质**。
 
 这些嵌套下拉在 API 里的写法是**点号路径**（`comfy_api/latest/_io.py: finalize_prefix` 用 `.` 拼接）：
 

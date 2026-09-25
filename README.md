@@ -98,10 +98,10 @@ CUDA backend requires cu130+ (`comfy/quant_ops.py:22-28`).
 
 ---
 
-## 3. `SaveVideo`'s H.264 re-encode is dead on this stack — use `VHS_VideoCombine`
+## 3. `SaveVideo`'s H.264 re-encode fails on odd dimensions — use `VHS_VideoCombine`
 
 `SaveVideo` exposes a `crf` control, but reaching it through the API is non-obvious, and
-once you do, **it fails**:
+once you do, **it fails — whenever the video's width or height is odd**:
 
 ```
 av.error.ExternalError: [Errno 542398533] Generic error in an external library:
@@ -109,8 +109,19 @@ av.error.ExternalError: [Errno 542398533] Generic error in an external library:
     'avcodec_open2("libx264", {'crf': '12.0'})'
 ```
 
-PyAV's bundled **libx264 cannot open**. The only working mode is `format=auto`, which
-*"preserves a compatible source stream"* — i.e. it cannot change quality at all.
+**It is the dimensions, not a broken encoder.** `video_types.py` hands the frame's
+width/height to libx264 unchanged while setting `pix_fmt = "yuv420p"` — and `yuv420p`
+subsamples chroma 2x2, so **both dimensions must be even**. libx264 refuses to open with
+`EINVAL (22)`, and since PyAV opens the encoder lazily inside `encode()`, it surfaces as a
+generic external-library error with no hint about dimensions.
+
+Measured on the same PyAV (18.1.0) with no ComfyUI running: `64x64` and `1080x1920` open
+fine; `65x63`, `63x65`, `65x65`, `1171x2532`, `1080x1441` all fail. Our reference image is
+**1259 x 1672** — odd width. Reported upstream as
+[ComfyUI #16544](https://github.com/Comfy-Org/ComfyUI/issues/16544).
+
+`format=auto` is not a workaround: it *"preserves a compatible source stream"*, so it
+cannot change quality at all.
 
 The API spelling for these nested combos is **dotted top-level keys**
 (`comfy_api/latest/_io.py: finalize_prefix` joins with `.`):
