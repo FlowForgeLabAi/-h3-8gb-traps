@@ -209,7 +209,7 @@ ERROR lora diffusion_model.blocks.N.adaln_proj.linear.weight shape '[96768, 8]'
   而几分钟前同样的图在 3:4 下跑得好好的。**+31% 像素就是那条线。**
 
 相关：16GB 机器上 **`--disable-pinned-memory` 是必需的** ——
-否则 `MAX_PINNED_MEMORY = ram * 0.90` 会让进程被系统杀掉。
+否则 `MAX_PINNED_MEMORY = ram * 0.40` 会让进程被系统杀掉。
 
 ---
 

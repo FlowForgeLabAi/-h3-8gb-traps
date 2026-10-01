@@ -211,7 +211,7 @@ Supporting measurements:
   was over the line.**
 
 Related: `--disable-pinned-memory` is **required** on 16 GB machines —
-`MAX_PINNED_MEMORY = ram * 0.90` otherwise gets the process killed.
+`MAX_PINNED_MEMORY = ram * 0.40` otherwise gets the process killed.
 
 **How to tell you are thrashing, in one number.** `nvidia-smi` power draw. Healthy
 sampling on this machine sits at **64–98 W**; thrashing sits at a **flat 34–36 W while
